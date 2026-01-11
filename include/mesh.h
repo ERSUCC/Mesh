@@ -8,7 +8,7 @@
 
 namespace Mesh
 {
-    float angle_dist(const float a0, const float a1);
+    #define ANGLE_EPSILON 1e-6
 
     struct Point
     {
@@ -16,6 +16,14 @@ namespace Mesh
 
         const float x;
         const float y;
+    };
+
+    struct Edge
+    {
+        Edge(const size_t p0, const size_t p1);
+
+        const size_t p0;
+        const size_t p1;
     };
 
     struct Triangle
@@ -27,14 +35,6 @@ namespace Mesh
         const size_t p2;
     };
 
-    struct Edge
-    {
-        Edge(const size_t p0, const size_t p1);
-
-        const size_t p0;
-        const size_t p1;
-    };
-
     struct Graph
     {
         Graph();
@@ -42,13 +42,16 @@ namespace Mesh
         void add_point(const float x, const float y);
 
         std::vector<Point*> get_points() const;
+        std::vector<Edge*> get_edges() const;
 
     private:
+        void add_edge(const size_t p0, const size_t p1);
+        void remove_edge(const Edge* e0);
+
         void add_triangle(const size_t p0, const size_t p1, const size_t p2);
         void remove_triangle(const Triangle* t0);
 
-        void add_edge(const size_t p0, const size_t p1);
-        void remove_edge(const Edge* e0);
+        float angle_dist(const float a0, const float a1) const;
 
         std::vector<Point*> points;
         std::vector<Triangle*> triangles = { new Triangle(0, 1, 2) };

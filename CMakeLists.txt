@@ -14,8 +14,10 @@ target_include_directories(mesh PRIVATE include)
 
 # build test suite
 
-add_executable(mesh_tests test/src/lodepng.cpp
-                          test/src/main.cpp)
+add_executable(mesh_tests test/src/graphics.cpp
+                          test/src/lodepng.cpp
+                          test/src/main.cpp
+                          test/src/test.cpp)
 
 target_include_directories(mesh_tests PRIVATE include test/include)
 target_link_libraries(mesh_tests mesh)

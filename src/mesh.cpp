@@ -2,26 +2,14 @@
 
 namespace Mesh
 {
-    float angle_dist(const float a0, const float a1)
-    {
-        const float dist = fabsf(a1 - a0);
-
-        if (dist > M_PI)
-        {
-            return M_PI * 2 - dist;
-        }
-
-        return dist;
-    }
-
     Point::Point(const float x, const float y) :
         x(x), y(y) {}
 
-    Triangle::Triangle(const size_t p0, const size_t p1, const size_t p2) :
-        p0(p0), p1(p1), p2(p2) {}
-
     Edge::Edge(const size_t p0, const size_t p1) :
         p0(p0), p1(p1) {}
+
+    Triangle::Triangle(const size_t p0, const size_t p1, const size_t p2) :
+        p0(p0), p1(p1), p2(p2) {}
 
     Graph::Graph()
     {
@@ -55,7 +43,7 @@ namespace Mesh
             const float a1 = atan2f(p1->y - point->y, p1->x - point->x);
             const float a2 = atan2f(p2->y - point->y, p2->x - point->x);
 
-            if (angle_dist(a0, a1) + angle_dist(a1, a2) + angle_dist(a2, a0) >= M_PI * 2)
+            if (fabsf(angle_dist(a0, a1) + angle_dist(a1, a2) + angle_dist(a2, a0) - M_PI * 2) <= ANGLE_EPSILON)
             {
                 remove_triangle(triangles[i]);
 
@@ -168,31 +156,22 @@ namespace Mesh
 
     std::vector<Point*> Graph::get_points() const
     {
-        std::vector<Point*> final_points;
+        return points;
+    }
 
-        for (size_t i = 3; i < points.size(); i++)
+    std::vector<Edge*> Graph::get_edges() const
+    {
+        std::vector<Edge*> final_edges;
+
+        for (Edge* edge : edges)
         {
-            final_points.push_back(points[i]);
+            if (edge->p0 > 2)
+            {
+                final_edges.push_back(edge);
+            }
         }
 
-        return final_points;
-    }
-
-    void Graph::add_triangle(const size_t p0, const size_t p1, const size_t p2)
-    {
-        std::vector<size_t> ps = { p0, p1, p2 };
-
-        std::sort(ps.begin(), ps.end());
-
-        triangles.push_back(new Triangle(ps[0], ps[1], ps[2]));
-    }
-
-    void Graph::remove_triangle(const Triangle* t0)
-    {
-        triangles.erase(std::find_if(triangles.begin(), triangles.end(), [=](const Triangle* t1)
-        {
-            return t0->p0 == t1->p0 && t0->p1 == t1->p1 && t0->p2 == t1->p2;
-        }));
+        return final_edges;
     }
 
     void Graph::add_edge(const size_t p0, const size_t p1)
@@ -214,5 +193,34 @@ namespace Mesh
         {
             return e0->p0 == e1->p0 && e0->p1 == e1->p1;
         }));
+    }
+
+    void Graph::add_triangle(const size_t p0, const size_t p1, const size_t p2)
+    {
+        std::vector<size_t> ps = { p0, p1, p2 };
+
+        std::sort(ps.begin(), ps.end());
+
+        triangles.push_back(new Triangle(ps[0], ps[1], ps[2]));
+    }
+
+    void Graph::remove_triangle(const Triangle* t0)
+    {
+        triangles.erase(std::find_if(triangles.begin(), triangles.end(), [=](const Triangle* t1)
+        {
+            return t0->p0 == t1->p0 && t0->p1 == t1->p1 && t0->p2 == t1->p2;
+        }));
+    }
+
+    float Graph::angle_dist(const float a0, const float a1) const
+    {
+        const float dist = fabsf(a1 - a0);
+
+        if (dist > M_PI)
+        {
+            return M_PI * 2 - dist;
+        }
+
+        return dist;
     }
 }
